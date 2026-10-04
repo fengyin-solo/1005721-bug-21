@@ -35,3 +35,47 @@ body { margin: 0; background: #f6f8fb; color: #1f2937; }
 .error-text { color: #b42318; }
 .status-legend { display: flex; flex-wrap: wrap; gap: 12px; margin: 0 0 10px; font-size: 12px; color: var(--muted); }
 .legend-item { background: #eef2f7; border-radius: 999px; padding: 2px 10px; }
+
+/* 缺项 / 异常在行内直接注明 */
+.tag { display: inline-block; border-radius: 4px; padding: 1px 6px; font-size: 12px; line-height: 1.5; margin: 1px 2px 1px 0; white-space: nowrap; }
+.tag.miss { background: #fff4e5; color: #b54708; border: 1px solid #f5c593; }
+.tag.bad { background: #fef3f2; color: #b42318; border: 1px solid #f2b8b5; }
+.tag.ok { background: #ecfdf3; color: #027a48; border: 1px solid #a6f4c5; }
+.cell-missing { color: #b54708; font-style: normal; background: #fff4e5; border-radius: 4px; padding: 1px 6px; }
+.value-abnormal { color: #b42318; font-weight: 600; text-decoration: underline wavy #d92d20; }
+.row-abnormal { background: #fffafa; }
+.setting-table .basis-cell { max-width: 260px; font-size: 12px; color: #334155; }
+.basis-line { margin: 0 0 2px; }
+.issue-cell { max-width: 260px; font-size: 12px; }
+.issue-cell p { margin: 1px 0; }
+.inline-link { margin-left: 6px; font-size: 12px; }
+.link.danger { color: #b42318; }
+.btn.danger { border-color: #f2b8b5; color: #b42318; }
+.btn.warn { border-color: #f5c593; background: #fff4e5; color: #b54708; }
+.ok-text { color: #027a48; }
+.stat-warn { color: #b54708; }
+.stat-bad { color: #b42318; }
+
+/* 明细 / 登记表单弹窗 */
+.modal-mask { position: fixed; inset: 0; background: rgba(16, 24, 40, 0.45); display: flex; align-items: center; justify-content: center; z-index: 50; padding: 24px; }
+.modal-panel { background: #fff; border-radius: 10px; width: 560px; max-width: 100%; max-height: 90vh; overflow: auto; box-shadow: 0 12px 32px rgba(16, 24, 40, 0.2); }
+.modal-panel.wide { width: 960px; }
+.modal-head { display: flex; justify-content: space-between; align-items: center; padding: 14px 18px; border-bottom: 1px solid var(--border); position: sticky; top: 0; background: #fff; }
+.modal-head h3 { margin: 0; font-size: 16px; }
+.modal-body { padding: 16px 18px; }
+.modal-foot { display: flex; justify-content: flex-end; gap: 8px; margin-top: 16px; }
+.form-item { display: block; margin-bottom: 12px; }
+.form-item > span { display: block; font-size: 12px; color: var(--muted); margin-bottom: 4px; }
+.form-item em { color: #b42318; font-style: normal; }
+.form-item input, .form-item select { width: 100%; border: 1px solid var(--border); border-radius: 6px; padding: 7px 10px; font-size: 13px; }
+.form-hint { color: #b54708; }
+.form-basis { background: #f8fafc; border: 1px solid var(--border); border-radius: 8px; padding: 10px 12px; margin: 4px 0 12px; }
+.basis-title { margin: 0 0 4px; font-size: 12px; color: var(--muted); }
+.basis-text { margin: 0 0 6px; font-size: 13px; line-height: 1.6; }
+.basis-range { margin: 0; font-size: 12px; color: #334155; }
+.sheet-meta { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; margin: 0 0 14px; }
+.sheet-meta dt { font-size: 12px; color: var(--muted); margin-bottom: 2px; }
+.sheet-meta dd { margin: 0; font-size: 13px; font-weight: 600; }
+.detail-table { font-size: 12px; }
+.detail-table th, .detail-table td { vertical-align: top; }
+.basis-foot { margin: 10px 0 0; font-size: 12px; color: var(--muted); }

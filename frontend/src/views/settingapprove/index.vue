@@ -42,8 +42,12 @@
         </tr>
       </thead>
       <tbody>
-        <tr v-for="row in rows" :key="String(row.id)">
-          <td v-for="column in columns" :key="column">{{ row[column] ?? '—' }}</td>
+        <tr v-for="row in rows" :key="String(row.id)" :class="{ 'row-void': String(row['审批层级']) === '作废复审' }">
+          <td>
+            {{ row[columns[0]] ?? '—' }}
+            <span v-if="String(row['审批层级']) === '作废复审'" class="tag bad">作废结论落单</span>
+          </td>
+          <td v-for="column in columns.slice(1)" :key="column">{{ row[column] ?? '—' }}</td>
           <td>{{ row.status }}</td>
           <td class="row-actions">
             <button
