@@ -1,5 +1,6 @@
 import { MODULE_BY_KEY } from '@/data/modules'
 import { allRows, listRows, resetRows, saveRows } from '@/data/local-store'
+import { issueSummary } from '@/data/setting-rules'
 import type { ActionResult, EntryRow, ModuleMeta, OverviewResult, PageResult } from '@/data/types'
 
 // 会写进数据的「往回走」动作：命中就把这条记录标成异常态，看板上能一眼看出来。
@@ -61,19 +62,72 @@ export function resetModule(key: string): PageResult {
   return listEntries(key)
 }
 
-export function exportEntries(key: string): { filename: string; content: string } {
-  const meta = moduleMeta(key)
-  const header = ['编号', ...meta.fields, '当前状态']
-  const lines = [header.join(',')]
-  for (const row of listRows(key)) {
-    lines.push([row.id, ...meta.fields.map((field) => row[field] ?? ''), row.status].join(','))
+// 单元格里可能带逗号、引号、换行，统一转义；缺项导出成【缺】而不是让整份文件报错。
+export function csvCell(value: unknown): string {
+  const text =
+    value === null || value === undefined || String(value).trim() === ''
+      ? '【缺】'
+      : String(value)
+  if (/[",\n\r]/.test(text)) {
+    return `"${text.replace(/"/g, '""')}"`
   }
-  return { filename: `${meta.name}-清单.csv`, content: `\uFEFF${lines.join('\n')}` }
+  return text
 }
 
-export function downloadEntries(key: string): void {
-  const { filename, content } = exportEntries(key)
-  const blob = new Blob([content], { type: 'text/csv;charset=utf-8' })
+export type ExportOptions = {
+  rows?: EntryRow[]
+  from?: number
+  extraColumns?: string[]
+}
+
+export type ExportPayload = {
+  filename: string
+  content: string
+  // 在 rows 中的 0 基失败下标；null 表示全部成功
+  failedAt: number | null
+}
+
+export function exportEntries(key: string, options: ExportOptions = {}): ExportPayload {
+  const meta = moduleMeta(key)
+  const source = options.rows ?? listRows(key)
+  const from = options.from ?? 0
+  const extras = options.extraColumns ?? []
+  const rows = source.slice(from)
+  const header = ['编号', ...meta.fields, '当前状态', ...extras]
+  const lines = [header.map(csvCell).join(',')]
+  let failedAt: number | null = null
+  rows.forEach((row, offset) => {
+    if (failedAt !== null) {
+      return
+    }
+    try {
+      const base = [row.id, ...meta.fields.map((field) => row[field] ?? ''), row.status]
+      if (key === 'settingvalue' && extras.includes('缺项/异常标注')) {
+        base.push(settingIssueNote(row))
+      }
+      lines.push(base.map(csvCell).join(','))
+    } catch {
+      failedAt = from + offset
+    }
+  })
+  return {
+    filename: `${meta.name}-清单.csv`,
+    content: `\uFEFF${lines.join('\n')}`,
+    failedAt,
+  }
+}
+
+// 定值单导出逐行带缺项/异常标注：缺了什么看文件就知道，不用再回页面猜。
+function settingIssueNote(row: EntryRow): string {
+  return issueSummary(row) || '完整'
+}
+
+export function downloadBlob(
+  filename: string,
+  content: string,
+  type = 'text/csv;charset=utf-8',
+): void {
+  const blob = new Blob([content], { type })
   const url = URL.createObjectURL(blob)
   const anchor = document.createElement('a')
   anchor.href = url
@@ -82,6 +136,11 @@ export function downloadEntries(key: string): void {
   anchor.click()
   document.body.removeChild(anchor)
   URL.revokeObjectURL(url)
+}
+
+export function downloadEntries(key: string): void {
+  const { filename, content } = exportEntries(key)
+  downloadBlob(filename, content)
 }
 
 export function loadOverview(): OverviewResult {

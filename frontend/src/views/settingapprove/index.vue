@@ -18,6 +18,10 @@
       </article>
     </div>
 
+    <p v-if="voidPendingCount" class="void-tip">
+      待送审清单中有 {{ voidPendingCount }} 条定值单作废结论（作废复核），来自定值整定的作废操作，需尽快送审确认。
+    </p>
+
     <p class="status-legend">
       <span v-for="item in statusSummary" :key="item.status" class="legend-item">
         {{ item.status }}：{{ item.count }}
@@ -42,8 +46,17 @@
         </tr>
       </thead>
       <tbody>
-        <tr v-for="row in rows" :key="String(row.id)">
-          <td v-for="column in columns" :key="column">{{ row[column] ?? '—' }}</td>
+        <tr
+          v-for="row in rows"
+          :key="String(row.id)"
+          :class="{ 'row-void-pending': isVoidPending(row) }"
+        >
+          <td v-for="column in columns" :key="column">
+            <template v-if="column === '审批层级' && isVoidPending(row)">
+              <span class="tag-void">{{ row[column] }}</span>
+            </template>
+            <template v-else>{{ row[column] ?? '—' }}</template>
+          </td>
           <td>{{ row.status }}</td>
           <td class="row-actions">
             <button
@@ -99,6 +112,15 @@ const statusSummary = computed(() =>
   })),
 )
 
+function isVoidPending(row: EntryRow): boolean {
+  return (
+    String(row.status) === '待送审' &&
+    String(row['审批层级'] ?? '') === '作废复核'
+  )
+}
+
+const voidPendingCount = computed(() => rows.value.filter(isVoidPending).length)
+
 function resetFilters() {
   filters.value = {}
   reload()
@@ -135,3 +157,18 @@ function reload() {
 
 onMounted(reload)
 </script>
+
+<style scoped>
+.row-void-pending { background: #fef3f2; }
+.tag-void {
+  display: inline-block;
+  background: #fee4e2;
+  color: #b42318;
+  border: 1px solid #fda29b;
+  border-radius: 4px;
+  padding: 0 6px;
+  font-size: 12px;
+  line-height: 18px;
+}
+.void-tip { margin: 0 0 10px; font-size: 12px; color: #b42318; }
+</style>
